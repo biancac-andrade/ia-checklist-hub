@@ -20,7 +20,10 @@ const server = express();
 
 let angularAppInstance: AngularNodeAppEngine | undefined;
 function getAngularApp(): AngularNodeAppEngine {
-  return (angularAppInstance ??= new AngularNodeAppEngine());
+  return (angularAppInstance ??= new AngularNodeAppEngine({
+    allowedHosts: ['localhost', '*.onrender.com'],
+    trustProxyHeaders: true,
+  }));
 }
 
 server.use(express.json());
