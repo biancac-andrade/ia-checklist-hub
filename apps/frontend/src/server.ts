@@ -8,10 +8,15 @@ import express, { Request, Response } from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  isStudyStatus,
   ReviewPlanInput,
   ReviewPlanOutput,
 } from '@ia-study-hub/shared-types';
 import { generateReviewPlanFlow, ReviewPlanInputSchema } from './flows';
+import {
+  ProgressRepository,
+  supabaseProgressRepository,
+} from './server/db';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
@@ -27,6 +32,59 @@ function getAngularApp(): AngularNodeAppEngine {
 }
 
 server.use(express.json());
+
+export async function handleGetProgress(
+  _req: Request,
+  res: Response,
+  repository: ProgressRepository = supabaseProgressRepository
+): Promise<void> {
+  try {
+    const progress = await repository.getAllProgress();
+    res.status(200).json(progress);
+  } catch (error) {
+    console.error('Erro ao buscar progresso no Supabase:', error);
+    res.status(500).json({
+      error: 'Falha ao consultar o progresso dos tópicos no banco de dados.',
+      details: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+export async function handleUpsertProgress(
+  req: Request,
+  res: Response,
+  repository: ProgressRepository = supabaseProgressRepository
+): Promise<void> {
+  const body = req.body as Record<string, unknown> | undefined;
+  const rawTopicId = body?.['topicId'];
+  const rawStatus = body?.['status'];
+
+  if (
+    typeof rawTopicId !== 'string' ||
+    rawTopicId.trim().length === 0 ||
+    !isStudyStatus(rawStatus)
+  ) {
+    res.status(400).json({
+      error:
+        'Payload inválido. Informe "topicId" (string não vazia) e "status" ("pending" | "deep_study" | "accelerated" | "review_later").',
+    });
+    return;
+  }
+
+  try {
+    const record = await repository.upsertProgress(
+      rawTopicId.trim(),
+      rawStatus
+    );
+    res.status(200).json(record);
+  } catch (error) {
+    console.error('Erro ao salvar progresso no Supabase:', error);
+    res.status(500).json({
+      error: 'Falha ao salvar o progresso do tópico no banco de dados.',
+      details: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
 
 export async function handleGeneratePlan(
   req: Request,
@@ -54,6 +112,14 @@ export async function handleGeneratePlan(
     });
   }
 }
+
+server.get('/api/progress', (req: Request, res: Response): void => {
+  void handleGetProgress(req, res);
+});
+
+server.post('/api/progress', (req: Request, res: Response): void => {
+  void handleUpsertProgress(req, res);
+});
 
 server.post('/api/generate-plan', (req: Request, res: Response): void => {
   void handleGeneratePlan(req, res);

@@ -1,5 +1,30 @@
 export type StudyStatus = 'pending' | 'deep_study' | 'accelerated' | 'review_later';
 
+export const VALID_STUDY_STATUSES: readonly StudyStatus[] = [
+  'pending',
+  'deep_study',
+  'accelerated',
+  'review_later',
+] as const;
+
+export function isStudyStatus(value: unknown): value is StudyStatus {
+  return (
+    typeof value === 'string' &&
+    (VALID_STUDY_STATUSES as readonly string[]).includes(value)
+  );
+}
+
+export interface TopicProgressRecord {
+  readonly topicId: string;
+  readonly status: StudyStatus;
+  readonly updatedAt?: string;
+}
+
+export interface UpdateTopicProgressPayload {
+  readonly topicId: string;
+  readonly status: StudyStatus;
+}
+
 export interface TopicItem {
   id: string;
   title: string;

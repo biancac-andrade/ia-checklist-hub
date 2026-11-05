@@ -21,6 +21,7 @@
     "@angular/router": "~22.2.0",
     "@angular/ssr": "~22.2.0",
     "@genkit-ai/google-genai": "^1.44.0",
+    "@supabase/supabase-js": "^2.119.0",
     "express": "^4.21.2",
     "genkit": "^1.44.0",
     "rxjs": "~7.8.0",

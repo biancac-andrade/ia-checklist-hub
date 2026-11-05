@@ -1,15 +1,28 @@
 import { isPlatformBrowser } from '@angular/common';
-import { computed, inject, Injectable, PLATFORM_ID, signal, Signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import {
+  computed,
+  inject,
+  Injectable,
+  PLATFORM_ID,
+  signal,
+  Signal,
+} from '@angular/core';
 import {
   CourseModule,
   INITIAL_SYLLABUS,
+  isStudyStatus,
   StudyMetrics,
   StudyStatus,
+  TopicProgressRecord,
+  UpdateTopicProgressPayload,
 } from '@ia-study-hub/shared-types';
 
 export const SYLLABUS_STORAGE_KEY = 'ia_course_syllabus_state_v1';
 
-export function calculateStudyMetrics(modules: readonly CourseModule[]): StudyMetrics {
+export function calculateStudyMetrics(
+  modules: readonly CourseModule[]
+): StudyMetrics {
   const allTopics = modules.flatMap((courseModule) => courseModule.topics);
   const total = allTopics.length;
 
@@ -55,12 +68,55 @@ export function calculateStudyMetrics(modules: readonly CourseModule[]): StudyMe
   };
 }
 
+export function applyTopicStatus(
+  modules: readonly CourseModule[],
+  topicId: string,
+  status: StudyStatus
+): CourseModule[] {
+  return modules.map((courseModule) => ({
+    ...courseModule,
+    topics: courseModule.topics.map((topic) =>
+      topic.id === topicId ? { ...topic, status } : topic
+    ),
+  }));
+}
+
+export function mergeRemoteProgress(
+  modules: readonly CourseModule[],
+  records: readonly TopicProgressRecord[]
+): CourseModule[] {
+  const statusMap = new Map<string, StudyStatus>();
+  for (const record of records) {
+    if (record.topicId && isStudyStatus(record.status)) {
+      statusMap.set(record.topicId, record.status);
+    }
+  }
+
+  if (statusMap.size === 0) {
+    return modules.map((courseModule) => ({
+      ...courseModule,
+      topics: [...courseModule.topics],
+    }));
+  }
+
+  return modules.map((courseModule) => ({
+    ...courseModule,
+    topics: courseModule.topics.map((topic) => {
+      const remoteStatus = statusMap.get(topic.id);
+      return remoteStatus ? { ...topic, status: remoteStatus } : topic;
+    }),
+  }));
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class SyllabusService {
   private readonly platformId: object = inject(PLATFORM_ID);
   private readonly isBrowser: boolean = isPlatformBrowser(this.platformId);
+  private readonly http: HttpClient | null = inject(HttpClient, {
+    optional: true,
+  });
 
   readonly modules = signal<CourseModule[]>(structuredClone(INITIAL_SYLLABUS));
 
@@ -84,27 +140,68 @@ export class SyllabusService {
 
   constructor() {
     this.loadFromStorage();
+    this.loadRemoteProgress();
+  }
+
+  loadRemoteProgress(): void {
+    if (!this.isBrowser || !this.http) {
+      return;
+    }
+
+    this.http.get<TopicProgressRecord[]>('/api/progress').subscribe({
+      next: (records) => {
+        if (Array.isArray(records) && records.length > 0) {
+          this.modules.update((current) =>
+            mergeRemoteProgress(current, records)
+          );
+          this.saveToStorage();
+        }
+      },
+      error: (error: unknown) => {
+        console.error('Failed to load progress from /api/progress:', error);
+      },
+    });
   }
 
   setStatus(topicId: string, status: StudyStatus): void {
-    this.modules.update((currentModules) =>
-      currentModules.map((courseModule) => ({
-        ...courseModule,
-        topics: courseModule.topics.map((topic) => {
-          if (topic.id !== topicId) {
-            return topic;
-          }
-          const nextStatus: StudyStatus =
-            topic.status === status ? 'pending' : status;
-          return {
-            ...topic,
-            status: nextStatus,
-          };
-        }),
-      }))
-    );
+    const existingTopic = this.modules()
+      .flatMap((courseModule) => courseModule.topics)
+      .find((topic) => topic.id === topicId);
 
+    if (!existingTopic) {
+      return;
+    }
+
+    const previousStatus: StudyStatus = existingTopic.status;
+    const nextStatus: StudyStatus =
+      previousStatus === status ? 'pending' : status;
+
+    this.modules.update((currentModules) =>
+      applyTopicStatus(currentModules, topicId, nextStatus)
+    );
     this.saveToStorage();
+
+    if (!this.isBrowser || !this.http) {
+      return;
+    }
+
+    const payload: UpdateTopicProgressPayload = {
+      topicId,
+      status: nextStatus,
+    };
+
+    this.http.post<TopicProgressRecord>('/api/progress', payload).subscribe({
+      error: (error: unknown) => {
+        console.error(
+          `Failed to persist status for topic "${topicId}", rolling back:`,
+          error
+        );
+        this.modules.update((currentModules) =>
+          applyTopicStatus(currentModules, topicId, previousStatus)
+        );
+        this.saveToStorage();
+      },
+    });
   }
 
   saveToStorage(): void {
@@ -113,7 +210,10 @@ export class SyllabusService {
     }
 
     try {
-      localStorage.setItem(SYLLABUS_STORAGE_KEY, JSON.stringify(this.modules()));
+      localStorage.setItem(
+        SYLLABUS_STORAGE_KEY,
+        JSON.stringify(this.modules())
+      );
     } catch (error) {
       console.error('Failed to save syllabus to localStorage:', error);
     }
