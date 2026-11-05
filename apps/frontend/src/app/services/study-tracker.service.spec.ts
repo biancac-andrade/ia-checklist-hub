@@ -37,8 +37,8 @@ describe('StudyTrackerService (Supabase API Integration)', () => {
     expect(req.request.method).toBe('GET');
 
     req.flush([
-      { topicId: 'mod-1-topic-1', status: 'deep_study' },
-      { topicId: 'mod-1-topic-2', status: 'accelerated' },
+      { topicId: 's1-m1-s1', status: 'deep_study' },
+      { topicId: 's1-podcast', status: 'accelerated' },
     ]);
 
     expect(service.metrics().deepStudy).toBe(1);
@@ -48,19 +48,19 @@ describe('StudyTrackerService (Supabase API Integration)', () => {
   it('should optimistically update signal and send POST /api/progress', () => {
     httpMock.expectOne('/api/progress').flush([]);
 
-    service.setStatus('mod-1-topic-1', 'deep_study');
+    service.setStatus('s1-m1-s1', 'deep_study');
 
     expect(service.metrics().deepStudy).toBe(1);
 
     const postReq = httpMock.expectOne('/api/progress');
     expect(postReq.request.method).toBe('POST');
     expect(postReq.request.body).toEqual({
-      topicId: 'mod-1-topic-1',
+      topicId: 's1-m1-s1',
       status: 'deep_study',
     });
 
     postReq.flush({
-      topicId: 'mod-1-topic-1',
+      topicId: 's1-m1-s1',
       status: 'deep_study',
       updatedAt: '2026-11-05T00:00:00.000Z',
     });
@@ -71,7 +71,7 @@ describe('StudyTrackerService (Supabase API Integration)', () => {
   it('should rollback signal state when POST /api/progress fails', () => {
     httpMock.expectOne('/api/progress').flush([]);
 
-    service.setStatus('mod-1-topic-1', 'accelerated');
+    service.setStatus('s1-m1-s1', 'accelerated');
     expect(service.metrics().accelerated).toBe(1);
 
     const postReq = httpMock.expectOne('/api/progress');
@@ -81,6 +81,6 @@ describe('StudyTrackerService (Supabase API Integration)', () => {
     );
 
     expect(service.metrics().accelerated).toBe(0);
-    expect(service.metrics().pending).toBe(73);
+    expect(service.metrics().pending).toBe(324);
   });
 });

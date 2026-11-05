@@ -4,15 +4,12 @@ describe('IA Course Tracker - Checklist E2E Flow', () => {
     cy.visit('/');
   });
 
-  it('1. Carregamento e Estado Inicial: deve carregar a rota com layout e métricas zeradas', () => {
-    // Verificar a renderização do título com a fonte correta e classes de estilo
+  it('1. Carregamento e Estado Inicial: deve carregar a rota com tema Dark e métricas zeradas', () => {
     cy.get('h1')
       .should('be.visible')
       .and('have.class', 'font-header')
-      .and('have.class', 'text-brand-dark')
       .and('contain.text', 'IA Course Tracker');
 
-    // Validar que os contadores de métricas iniciam zerados (0% de progresso)
     cy.contains('article', 'Progresso do Certificado').within(() => {
       cy.contains('0%').should('be.visible');
     });
@@ -25,58 +22,50 @@ describe('IA Course Tracker - Checklist E2E Flow', () => {
       cy.contains('0').should('be.visible');
     });
 
-    cy.contains('article', 'Dívida p/ Modo Vitalício').within(() => {
+    cy.contains('article', 'Voltar com Calma').within(() => {
       cy.contains('0').should('be.visible');
     });
 
-    // Validar carregamento do módulo 1 e do tópico inicial
     cy.contains('h2', 'Fundamentos de IA e LLMs para Programadores').should(
       'be.visible'
     );
-    cy.contains('[data-testid="topic-row"]', 'História e contexto da IA').should(
-      'be.visible'
+    cy.get('[data-item-id="s1-m1-s1"]')
+      .should('be.visible')
+      .and('contain.text', 'Submódulo 1.1');
+
+    cy.get('[data-testid="subject-locked-s12"]').should(
+      'contain.text',
+      '🔒 BLOQUEADA • Início em 14/11/2026'
     );
   });
 
   it('2. Seleção de Status e Atualização Visual: deve atualizar chip visual e métricas dinâmicas', () => {
-    // Localizar a linha do tópico "História e contexto da IA"
-    cy.contains('[data-testid="topic-row"]', 'História e contexto da IA').within(
-      () => {
-        // Clicar no chip "Acelerado (Prova)"
-        cy.contains('button', 'Acelerado (Prova)')
-          .should('have.attr', 'aria-pressed', 'false')
-          .click();
+    cy.get('[data-item-id="s1-m1-s1"]').within(() => {
+      cy.contains('button', 'Acelerado / Prova')
+        .should('have.attr', 'aria-pressed', 'false')
+        .click();
 
-        // Validar que o chip recebe a classe de destaque correspondente (brand-yellow)
-        cy.contains('button', 'Acelerado (Prova)')
-          .should('have.class', 'bg-brand-yellow')
-          .and('have.attr', 'aria-pressed', 'true');
-      }
-    );
+      cy.contains('button', 'Acelerado / Prova')
+        .should('have.class', 'bg-[#FFFA93]')
+        .and('have.attr', 'aria-pressed', 'true');
+    });
 
-    // Verificar se o contador de "Acelerado" foi incrementado para 1
     cy.contains('article', 'Acelerado p/ Prova').within(() => {
       cy.contains('1').should('be.visible');
     });
 
-    // Clicar em "Estudado a Fundo" no mesmo item e validar que a seleção anterior foi substituída
-    cy.contains('[data-testid="topic-row"]', 'História e contexto da IA').within(
-      () => {
-        cy.contains('button', 'Estudado a Fundo').click();
+    cy.get('[data-item-id="s1-m1-s1"]').within(() => {
+      cy.contains('button', 'Estudado a Fundo').click();
 
-        // Validar que o novo chip recebe a classe de destaque correspondente (brand-mint)
-        cy.contains('button', 'Estudado a Fundo')
-          .should('have.class', 'bg-brand-mint')
-          .and('have.attr', 'aria-pressed', 'true');
+      cy.contains('button', 'Estudado a Fundo')
+        .should('have.class', 'bg-[#85E8A5]')
+        .and('have.attr', 'aria-pressed', 'true');
 
-        // Validar que a seleção anterior foi desmarcada
-        cy.contains('button', 'Acelerado (Prova)')
-          .should('not.have.class', 'bg-brand-yellow')
-          .and('have.attr', 'aria-pressed', 'false');
-      }
-    );
+      cy.contains('button', 'Acelerado / Prova')
+        .should('not.have.class', 'bg-[#FFFA93]')
+        .and('have.attr', 'aria-pressed', 'false');
+    });
 
-    // Verificar atualização das métricas no dashboard
     cy.contains('article', 'Estudado a Fundo').within(() => {
       cy.contains('1').should('be.visible');
     });
@@ -86,36 +75,28 @@ describe('IA Course Tracker - Checklist E2E Flow', () => {
     });
   });
 
-  it('3. Persistência de Dados: deve manter o estado salvo no localStorage após cy.reload()', () => {
-    // Marcar "Estudado a Fundo" no tópico "História e contexto da IA"
-    cy.contains('[data-testid="topic-row"]', 'História e contexto da IA').within(
-      () => {
-        cy.contains('button', 'Estudado a Fundo').click();
-        cy.contains('button', 'Estudado a Fundo').should(
-          'have.class',
-          'bg-brand-mint'
-        );
-      }
-    );
+  it('3. Persistência de Dados: deve manter o estado salvo após cy.reload()', () => {
+    cy.get('[data-item-id="s1-m1-s1"]').within(() => {
+      cy.contains('button', 'Estudado a Fundo').click();
+      cy.contains('button', 'Estudado a Fundo').should(
+        'have.class',
+        'bg-[#85E8A5]'
+      );
+    });
 
-    // Recarregar a página com cy.reload()
     cy.reload();
 
-    // Garantir que o estado marcado permanece salvo via localStorage
-    cy.contains('[data-testid="topic-row"]', 'História e contexto da IA').within(
-      () => {
-        cy.contains('button', 'Estudado a Fundo')
-          .should('be.visible')
-          .and('have.class', 'bg-brand-mint')
-          .and('have.attr', 'aria-pressed', 'true');
+    cy.get('[data-item-id="s1-m1-s1"]').within(() => {
+      cy.contains('button', 'Estudado a Fundo')
+        .should('be.visible')
+        .and('have.class', 'bg-[#85E8A5]')
+        .and('have.attr', 'aria-pressed', 'true');
 
-        cy.contains('button', 'Acelerado (Prova)')
-          .should('not.have.class', 'bg-brand-yellow')
-          .and('have.attr', 'aria-pressed', 'false');
-      }
-    );
+      cy.contains('button', 'Acelerado / Prova')
+        .should('not.have.class', 'bg-[#FFFA93]')
+        .and('have.attr', 'aria-pressed', 'false');
+    });
 
-    // Validar que a métrica reidratada permanece com 1 item estudado a fundo
     cy.contains('article', 'Estudado a Fundo').within(() => {
       cy.contains('1').should('be.visible');
     });

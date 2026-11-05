@@ -30,51 +30,59 @@ describe('ChecklistComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the main header with font-header and text-brand-dark', () => {
-    const heading = fixture.debugElement.query(By.css('h1')).nativeElement as HTMLElement;
+  it('should display the main header with font-header and dark mode text', () => {
+    const heading = fixture.debugElement.query(By.css('h1'))
+      .nativeElement as HTMLElement;
     expect(heading.textContent).toContain('IA Course Tracker');
     expect(heading.classList).toContain('font-header');
-    expect(heading.classList).toContain('text-brand-dark');
+    expect(heading.classList).toContain('text-[#F1F5F9]');
   });
 
-  it('should render the 4 metrics cards', () => {
-    const cards = fixture.debugElement.queryAll(By.css('section[aria-label="Painel de Métricas do Curso"] article'));
-    expect(cards.length).toBe(4);
-
-    expect(cards[0].nativeElement.classList).toContain('bg-brand-sky/20');
-    expect(cards[1].nativeElement.classList).toContain('bg-brand-mint/20');
-    expect(cards[2].nativeElement.classList).toContain('bg-brand-yellow/30');
-    expect(cards[3].nativeElement.classList).toContain('bg-brand-coral/20');
-  });
-
-  it('should render 10 course module cards with correct titles and rounded-2xl', () => {
-    const moduleCards = fixture.debugElement.queryAll(
-      By.css('section[aria-label="Módulos da Ementa"] > div')
+  it('should render the 4 metrics cards in dark theme', () => {
+    const cards = fixture.debugElement.queryAll(
+      By.css('section[aria-label="Painel de Métricas do Curso"] article')
     );
-    expect(moduleCards.length).toBe(10);
-    expect(moduleCards[0].nativeElement.classList).toContain('rounded-2xl');
-
-    const firstModuleTitle = moduleCards[0].query(By.css('h2')).nativeElement as HTMLElement;
-    expect(firstModuleTitle.textContent).toContain('Fundamentos de IA e LLMs para Programadores');
-    expect(firstModuleTitle.classList).toContain('font-header');
+    expect(cards.length).toBe(4);
+    expect(cards[0].nativeElement.classList).toContain('bg-[#111827]');
   });
 
-  it('should update topic status when chip button is clicked and set aria-pressed', () => {
+  it('should render 11 unlocked subjects and 4 locked subjects with startDate badge', () => {
+    const unlockedCards = fixture.debugElement.queryAll(
+      By.css('[data-testid^="subject-card-"]')
+    );
+    const lockedCards = fixture.debugElement.queryAll(
+      By.css('[data-testid^="subject-locked-"]')
+    );
+
+    expect(unlockedCards.length).toBe(11);
+    expect(lockedCards.length).toBe(4);
+
+    const firstLockedText = (lockedCards[0].nativeElement as HTMLElement)
+      .textContent;
+    expect(firstLockedText).toContain('🔒 BLOQUEADA • Início em 14/11/2026');
+  });
+
+  it('should update submodule status when chip button is clicked and set aria-pressed', () => {
     const firstButton = fixture.debugElement.query(
       By.css('button[aria-label^="Marcar como Estudado a Fundo"]')
     );
-    expect(firstButton.nativeElement.getAttribute('aria-pressed')).toBe('false');
+    expect(firstButton.nativeElement.getAttribute('aria-pressed')).toBe(
+      'false'
+    );
 
     firstButton.nativeElement.click();
     fixture.detectChanges();
 
     expect(firstButton.nativeElement.getAttribute('aria-pressed')).toBe('true');
+    expect(firstButton.nativeElement.classList).toContain('bg-[#85E8A5]');
     expect(component.metrics().deepStudy).toBe(1);
 
     firstButton.nativeElement.click();
     fixture.detectChanges();
 
-    expect(firstButton.nativeElement.getAttribute('aria-pressed')).toBe('false');
+    expect(firstButton.nativeElement.getAttribute('aria-pressed')).toBe(
+      'false'
+    );
     expect(component.metrics().deepStudy).toBe(0);
   });
 

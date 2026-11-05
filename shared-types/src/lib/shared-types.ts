@@ -37,6 +37,41 @@ export interface CourseModule {
   topics: TopicItem[];
 }
 
+export interface SubmoduleItem {
+  id: string;
+  title: string;
+  status: StudyStatus;
+}
+
+export interface SubjectModule {
+  id: string;
+  moduleNumber: number;
+  title: string;
+  submodules: SubmoduleItem[];
+}
+
+export interface SubjectCatalogSpec {
+  id: string;
+  number: number;
+  title: string;
+  moduleSubCounts: readonly number[];
+  hasPodcast: boolean;
+  hasEvaluation: boolean;
+  isLocked?: boolean;
+  startDate?: string;
+}
+
+export interface CourseSubject {
+  id: string;
+  number: number;
+  title: string;
+  isLocked: boolean;
+  startDate?: string;
+  modules: SubjectModule[];
+  podcast?: SubmoduleItem;
+  evaluation?: SubmoduleItem;
+}
+
 export interface StudyMetrics {
   total: number;
   deepStudy: number;

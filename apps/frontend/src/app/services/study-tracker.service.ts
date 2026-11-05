@@ -1,16 +1,20 @@
 import { Injectable } from '@angular/core';
 import {
-  applyTopicStatus,
+  applySubjectItemStatus,
   calculateStudyMetrics,
-  mergeRemoteProgress,
+  calculateStudyMetricsFromItems,
+  extractTrackableItems,
+  mergeRemoteProgressIntoSubjects,
   SYLLABUS_STORAGE_KEY,
   SyllabusService,
 } from './syllabus.service';
 
 export {
-  applyTopicStatus,
+  applySubjectItemStatus,
   calculateStudyMetrics,
-  mergeRemoteProgress,
+  calculateStudyMetricsFromItems,
+  extractTrackableItems,
+  mergeRemoteProgressIntoSubjects,
   SYLLABUS_STORAGE_KEY,
   SyllabusService,
 };

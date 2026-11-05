@@ -1,311 +1,410 @@
-<main class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-  <header class="mb-8">
-    <div
-      class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 border-b border-gray-200"
-    >
-      <div>
-        <div
-          class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-lavender/25 text-brand-dark mb-2"
-        >
-          <span>✨ Monitoramento da Ementa Oficial</span>
+<div class="min-h-screen bg-[#0B0F19] text-[#F1F5F9] py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto space-y-8">
+    <header class="space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#1F2937] pb-6">
+        <div>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-[#1E293B] text-[#9FCAFF] border border-[#334155] mb-3">
+            Pós-Graduação • Engenharia de IA Aplicada
+          </span>
+          <h1 class="font-header text-3xl sm:text-4xl font-bold text-[#F1F5F9] tracking-tight">
+            IA Course Tracker &amp; Study Hub
+          </h1>
+          <p class="mt-2 text-sm sm:text-base text-[#94A3B8] max-w-2xl">
+            Acompanhamento completo por Matéria, Módulo, Submódulo, Podcast e Avaliação com sincronização automática no Supabase.
+          </p>
         </div>
-        <h1
-          class="font-header text-3xl sm:text-4xl lg:text-5xl font-extrabold text-brand-dark tracking-tight"
-        >
-          IA Course Tracker
-        </h1>
-        <p class="text-sm sm:text-base text-gray-600 mt-2 max-w-3xl">
-          Controle seu progresso na formação de Engenharia de IA. Acompanhe a
-          meta de certificação, registre o domínio aprofundado e mapeie os
-          tópicos para revisão no modo vitalício.
-        </p>
+
+        <div class="flex items-center gap-3 self-start sm:self-center">
+          <button
+            type="button"
+            (click)="onReset()"
+            aria-label="Restaurar estado padrão inicial da ementa"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-[#CBD5E1] bg-[#1E293B] border border-[#334155] hover:bg-[#334155] transition-colors cursor-pointer"
+          >
+            Resetar Progresso
+          </button>
+        </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          (click)="onReset()"
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand-coral/50 cursor-pointer active:scale-95"
-          aria-label="Restaurar estado padrão inicial da ementa"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-4 h-4 text-gray-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          Resetar Progresso
-        </button>
-      </div>
-    </div>
-
-    <section
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6"
-      aria-label="Painel de Métricas do Curso"
-    >
-      <article
-        class="bg-brand-sky/20 border border-brand-sky rounded-2xl p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-between"
+      <section
+        aria-label="Painel de Métricas do Curso"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-blue-900"
-            >Certificado</span
-          >
-          <span
-            class="w-8 h-8 rounded-full bg-brand-sky/40 flex items-center justify-center text-blue-900"
-          >
-            🎓
-          </span>
-        </div>
-        <div class="mt-4">
-          <div class="text-3xl sm:text-4xl font-extrabold text-blue-950">
-            {{ metrics().certificateProgressPercent }}%
-          </div>
-          <p class="text-xs sm:text-sm text-blue-900/80 mt-1 font-medium">
-            Progresso do Certificado
-          </p>
-        </div>
-        <div class="w-full bg-blue-950/10 h-2 rounded-full mt-4 overflow-hidden">
-          <div
-            class="bg-blue-600 h-full rounded-full transition-all duration-500"
-            [style.width.%]="metrics().certificateProgressPercent"
-          ></div>
-        </div>
-      </article>
-
-      <article
-        class="bg-brand-mint/20 border border-brand-mint rounded-2xl p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-between"
-      >
-        <div class="flex items-center justify-between">
-          <span
-            class="text-xs font-bold uppercase tracking-wider text-emerald-900"
-            >Domínio Real</span
-          >
-          <span
-            class="w-8 h-8 rounded-full bg-brand-mint/40 flex items-center justify-center text-emerald-900"
-          >
-            🧠
-          </span>
-        </div>
-        <div class="mt-4">
-          <div class="text-3xl sm:text-4xl font-extrabold text-emerald-950">
-            {{ metrics().deepStudy }}
-            <span class="text-base font-semibold text-emerald-800"
-              >/ {{ metrics().total }}</span
-            >
-          </div>
-          <p class="text-xs sm:text-sm text-emerald-900/80 mt-1 font-medium">
-            Estudado a Fundo
-          </p>
-        </div>
-        <div
-          class="w-full bg-emerald-950/10 h-2 rounded-full mt-4 overflow-hidden"
-        >
-          <div
-            class="bg-emerald-600 h-full rounded-full transition-all duration-500"
-            [style.width.%]="metrics().realMasteryPercent"
-          ></div>
-        </div>
-      </article>
-
-      <article
-        class="bg-brand-yellow/30 border border-brand-yellow rounded-2xl p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-between"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-900"
-            >Velocidade</span
-          >
-          <span
-            class="w-8 h-8 rounded-full bg-brand-yellow/50 flex items-center justify-center text-amber-900"
-          >
-            ⚡
-          </span>
-        </div>
-        <div class="mt-4">
-          <div class="text-3xl sm:text-4xl font-extrabold text-amber-950">
-            {{ metrics().accelerated }}
-            <span class="text-base font-semibold text-amber-800">itens</span>
-          </div>
-          <p class="text-xs sm:text-sm text-amber-900/80 mt-1 font-medium">
-            Acelerado p/ Prova
-          </p>
-        </div>
-        <div
-          class="w-full bg-amber-950/10 h-2 rounded-full mt-4 overflow-hidden"
-        >
-          <div
-            class="bg-amber-500 h-full rounded-full transition-all duration-500"
-            [style.width.%]="
-              metrics().total > 0
-                ? (metrics().accelerated / metrics().total) * 100
-                : 0
-            "
-          ></div>
-        </div>
-      </article>
-
-      <article
-        class="bg-brand-coral/20 border border-brand-coral rounded-2xl p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-between"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-rose-900"
-            >Revisão Futura</span
-          >
-          <span
-            class="w-8 h-8 rounded-full bg-brand-coral/40 flex items-center justify-center text-rose-900"
-          >
-            📌
-          </span>
-        </div>
-        <div class="mt-4">
-          <div class="text-3xl sm:text-4xl font-extrabold text-rose-950">
-            {{ metrics().reviewLater }}
-            <span class="text-base font-semibold text-rose-800">itens</span>
-          </div>
-          <p class="text-xs sm:text-sm text-rose-900/80 mt-1 font-medium">
-            Dívida p/ Modo Vitalício
-          </p>
-        </div>
-        <div
-          class="w-full bg-rose-950/10 h-2 rounded-full mt-4 overflow-hidden"
-        >
-          <div
-            class="bg-rose-500 h-full rounded-full transition-all duration-500"
-            [style.width.%]="
-              metrics().total > 0
-                ? (metrics().reviewLater / metrics().total) * 100
-                : 0
-            "
-          ></div>
-        </div>
-      </article>
-    </section>
-  </header>
-
-  <section class="space-y-6" aria-label="Módulos da Ementa">
-    @for (courseModule of modules(); track courseModule.id) {
-      <div
-        class="bg-white border border-gray-200/80 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md"
-      >
-        <header
-          class="bg-brand-lavender/15 px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-        >
-          <div class="flex items-center gap-3">
-            <span
-              class="w-7 h-7 rounded-lg bg-brand-lavender/40 text-brand-dark flex items-center justify-center font-bold text-xs"
-            >
-              {{ courseModule.id }}
+        <article class="rounded-xl p-5 bg-[#111827] border border-[#1F2937] flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#9FCAFF]">
+              Progresso do Certificado
             </span>
-            <h2
-              class="font-header text-xl font-bold text-gray-800 tracking-normal"
-            >
-              {{ courseModule.title }}
-            </h2>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-[#1E293B] text-[#9FCAFF]">
+              Meta 100%
+            </span>
           </div>
-          <div class="text-xs font-semibold text-gray-500">
-            {{ courseModule.topics.length }} tópicos
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="font-header text-3xl font-bold text-[#F1F5F9]">
+              {{ metrics().certificateProgressPercent }}%
+            </span>
+            <span class="text-xs text-[#94A3B8]">
+              ({{ metrics().deepStudy + metrics().accelerated }}/{{ metrics().total }})
+            </span>
           </div>
-        </header>
-
-        <div class="divide-y divide-gray-100">
-          @for (topic of courseModule.topics; track topic.id) {
+          <div class="mt-3 w-full bg-[#1E293B] h-2 rounded-full overflow-hidden">
             <div
-              data-testid="topic-row"
-              [attr.data-topic-id]="topic.id"
-              class="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-colors hover:bg-gray-50/60"
+              class="bg-[#9FCAFF] h-full transition-all duration-300"
+              [style.width.%]="metrics().certificateProgressPercent"
+            ></div>
+          </div>
+        </article>
+
+        <article class="rounded-xl p-5 bg-[#111827] border border-[#1F2937] flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#85E8A5]">
+              🟢 Estudado a Fundo
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-[#85E8A5] text-[#064E3B]">
+              {{ metrics().realMasteryPercent }}% Maestria
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="font-header text-3xl font-bold text-[#85E8A5]">
+              {{ metrics().deepStudy }}
+            </span>
+            <span class="text-xs text-[#94A3B8]">submódulos / itens</span>
+          </div>
+          <p class="mt-3 text-xs text-[#94A3B8]">
+            Conteúdo consolidado com prática
+          </p>
+        </article>
+
+        <article class="rounded-xl p-5 bg-[#111827] border border-[#1F2937] flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#FFFA93]">
+              🟡 Acelerado p/ Prova
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-[#FFFA93] text-[#713F12]">
+              Sprint
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="font-header text-3xl font-bold text-[#FFFA93]">
+              {{ metrics().accelerated }}
+            </span>
+            <span class="text-xs text-[#94A3B8]">submódulos / itens</span>
+          </div>
+          <p class="mt-3 text-xs text-[#94A3B8]">
+            Concluídos rápido para o certificado
+          </p>
+        </article>
+
+        <article class="rounded-xl p-5 bg-[#111827] border border-[#1F2937] flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#D085E8]">
+              🟣 Voltar com Calma
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-[#D085E8] text-[#581C87]">
+              Vitalício
+            </span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span class="font-header text-3xl font-bold text-[#D085E8]">
+              {{ metrics().reviewLater }}
+            </span>
+            <span class="text-xs text-[#94A3B8]">submódulos / itens</span>
+          </div>
+          <p class="mt-3 text-xs text-[#94A3B8]">
+            Marcados para revisão pós-certificado
+          </p>
+        </article>
+      </section>
+    </header>
+
+    <main>
+      <section aria-label="Matérias da Ementa" class="space-y-6">
+        @for (subject of subjects(); track subject.id) {
+          @if (subject.isLocked) {
+            <div
+              [attr.data-testid]="'subject-locked-' + subject.id"
+              class="bg-[#111827] border border-dashed border-gray-700 rounded-xl p-5 opacity-50 pointer-events-none flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
             >
-              <div class="flex items-start gap-3">
-                <span
-                  class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 transition-all"
-                  [ngClass]="{
-                    'bg-brand-mint ring-4 ring-brand-mint/30':
-                      topic.status === 'deep_study',
-                    'bg-brand-yellow ring-4 ring-brand-yellow/40':
-                      topic.status === 'accelerated',
-                    'bg-brand-coral ring-4 ring-brand-coral/30':
-                      topic.status === 'review_later',
-                    'bg-gray-300': topic.status === 'pending'
-                  }"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="text-sm font-medium transition-colors"
-                  [ngClass]="{
-                    'text-gray-900 font-semibold': topic.status !== 'pending',
-                    'text-gray-700': topic.status === 'pending'
-                  }"
-                >
-                  {{ topic.title }}
+              <div class="flex items-center gap-3">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#1E293B] text-[#9CA3AF] font-header font-bold text-sm">
+                  {{ subject.number }}
                 </span>
+                <h2 class="font-header text-lg sm:text-xl font-bold text-[#F1F5F9]">
+                  {{ subject.title }}
+                </h2>
               </div>
 
-              <div
-                class="flex items-center gap-2 shrink-0 self-end sm:self-center"
-                role="group"
-                [attr.aria-label]="'Opções de status para ' + topic.title"
-              >
-                <button
-                  type="button"
-                  (click)="onStatusClick(topic.id, 'deep_study')"
-                  [attr.aria-pressed]="topic.status === 'deep_study'"
-                  [attr.aria-label]="
-                    'Marcar como Estudado a Fundo: ' + topic.title
-                  "
-                  class="cursor-pointer text-xs px-3 py-1.5 rounded-full border transition-all select-none focus:outline-none focus:ring-2 focus:ring-brand-mint/60"
-                  [ngClass]="
-                    topic.status === 'deep_study'
-                      ? 'bg-brand-mint text-emerald-950 border-emerald-400 font-bold shadow-sm scale-105'
-                      : 'bg-white/90 text-gray-600 border-gray-200 hover:bg-brand-mint/20 hover:text-emerald-900'
-                  "
-                >
-                  ✓ Estudado a Fundo
-                </button>
+              <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1E293B] text-[#9CA3AF] border border-gray-700">
+                🔒 BLOQUEADA • Início em {{ subject.startDate }}
+              </span>
+            </div>
+          } @else {
+            <div
+              [attr.data-testid]="'subject-card-' + subject.id"
+              class="bg-[#111827] border border-[#1F2937] rounded-xl overflow-hidden shadow-sm"
+            >
+              <div class="px-5 py-4 bg-[#111827] border-b border-[#1F2937] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#1E293B] text-[#9FCAFF] font-header font-bold text-sm border border-[#334155]">
+                    {{ subject.number }}
+                  </span>
+                  <div>
+                    <h2 class="font-header text-xl font-bold text-[#F1F5F9]">
+                      {{ subject.title }}
+                    </h2>
+                    <p class="text-xs text-[#94A3B8]">
+                      {{ subject.modules.length }} módulos •
+                      {{ getSubjectStats(subject).completed }}/{{ getSubjectStats(subject).total }} concluídos
+                    </p>
+                  </div>
+                </div>
 
                 <button
                   type="button"
-                  (click)="onStatusClick(topic.id, 'accelerated')"
-                  [attr.aria-pressed]="topic.status === 'accelerated'"
-                  [attr.aria-label]="
-                    'Marcar como Acelerado para Prova: ' + topic.title
-                  "
-                  class="cursor-pointer text-xs px-3 py-1.5 rounded-full border transition-all select-none focus:outline-none focus:ring-2 focus:ring-brand-yellow/60"
-                  [ngClass]="
-                    topic.status === 'accelerated'
-                      ? 'bg-brand-yellow text-amber-950 border-amber-400 font-bold shadow-sm scale-105'
-                      : 'bg-white/90 text-gray-600 border-gray-200 hover:bg-brand-yellow/30 hover:text-amber-900'
-                  "
+                  (click)="toggleSubject(subject.id)"
+                  [attr.aria-expanded]="!isSubjectCollapsed(subject.id)"
+                  class="self-start sm:self-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1E293B] text-[#CBD5E1] hover:bg-[#334155] transition-colors cursor-pointer"
                 >
-                  ⚡ Acelerado (Prova)
-                </button>
-
-                <button
-                  type="button"
-                  (click)="onStatusClick(topic.id, 'review_later')"
-                  [attr.aria-pressed]="topic.status === 'review_later'"
-                  [attr.aria-label]="
-                    'Marcar como Voltar com Calma: ' + topic.title
-                  "
-                  class="cursor-pointer text-xs px-3 py-1.5 rounded-full border transition-all select-none focus:outline-none focus:ring-2 focus:ring-brand-coral/60"
-                  [ngClass]="
-                    topic.status === 'review_later'
-                      ? 'bg-brand-coral text-rose-950 border-rose-400 font-bold shadow-sm scale-105'
-                      : 'bg-white/90 text-gray-600 border-gray-200 hover:bg-brand-coral/20 hover:text-rose-900'
-                  "
-                >
-                  📌 Voltar com Calma
+                  {{ isSubjectCollapsed(subject.id) ? 'Expandir Matéria' : 'Recolher Matéria' }}
                 </button>
               </div>
+
+              @if (!isSubjectCollapsed(subject.id)) {
+                <div class="p-5 space-y-4">
+                  @for (mod of subject.modules; track mod.id) {
+                    <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-4 space-y-3">
+                      <div class="flex items-center justify-between border-b border-[#1F2937] pb-2">
+                        <h3 class="font-header text-base font-bold text-[#E2E8F0]">
+                          {{ mod.title }}
+                        </h3>
+                        <span class="text-xs text-[#9CA3AF]">
+                          {{ mod.submodules.length }} {{ mod.submodules.length === 1 ? 'submódulo' : 'submódulos' }}
+                        </span>
+                      </div>
+
+                      <div class="space-y-2">
+                        @for (sub of mod.submodules; track sub.id) {
+                          <div
+                            data-testid="topic-row"
+                            [attr.data-item-id]="sub.id"
+                            class="bg-[#1E293B] p-3 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                          >
+                            <div class="flex items-center gap-2.5">
+                              <span
+                                class="w-2 h-2 rounded-full shrink-0"
+                                [ngClass]="{
+                                  'bg-[#85E8A5]': sub.status === 'deep_study',
+                                  'bg-[#FFFA93]': sub.status === 'accelerated',
+                                  'bg-[#D085E8]': sub.status === 'review_later',
+                                  'bg-[#64748B]': sub.status === 'pending'
+                                }"
+                              ></span>
+                              <span class="text-sm font-medium text-[#F1F5F9]">
+                                {{ sub.title }}
+                              </span>
+                            </div>
+
+                            <div
+                              role="group"
+                              [attr.aria-label]="'Status de estudo para ' + subject.title + ' ' + sub.title"
+                              class="flex flex-wrap items-center gap-2"
+                            >
+                              <button
+                                type="button"
+                                (click)="onStatusClick(sub.id, 'deep_study')"
+                                [attr.aria-pressed]="sub.status === 'deep_study'"
+                                [attr.aria-label]="'Marcar como Estudado a Fundo: ' + sub.title"
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                                [ngClass]="
+                                  sub.status === 'deep_study'
+                                    ? 'bg-[#85E8A5] text-[#064E3B] scale-105 shadow-sm'
+                                    : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                                "
+                              >
+                                🟢 Estudado a Fundo
+                              </button>
+
+                              <button
+                                type="button"
+                                (click)="onStatusClick(sub.id, 'accelerated')"
+                                [attr.aria-pressed]="sub.status === 'accelerated'"
+                                [attr.aria-label]="'Marcar como Acelerado para Prova: ' + sub.title"
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                                [ngClass]="
+                                  sub.status === 'accelerated'
+                                    ? 'bg-[#FFFA93] text-[#713F12] scale-105 shadow-sm'
+                                    : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                                "
+                              >
+                                🟡 Acelerado / Prova
+                              </button>
+
+                              <button
+                                type="button"
+                                (click)="onStatusClick(sub.id, 'review_later')"
+                                [attr.aria-pressed]="sub.status === 'review_later'"
+                                [attr.aria-label]="'Marcar como Voltar com Calma: ' + sub.title"
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                                [ngClass]="
+                                  sub.status === 'review_later'
+                                    ? 'bg-[#D085E8] text-[#581C87] scale-105 shadow-sm'
+                                    : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                                "
+                              >
+                                🟣 Voltar com Calma
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (subject.podcast || subject.evaluation) {
+                    <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-4 space-y-2">
+                      <h3 class="font-header text-sm font-bold uppercase tracking-wider text-[#94A3B8] pb-1">
+                        Atividades Finais da Matéria
+                      </h3>
+
+                      @if (subject.podcast; as podcast) {
+                        <div
+                          data-testid="topic-row"
+                          [attr.data-item-id]="podcast.id"
+                          class="bg-[#1E293B] p-3 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                        >
+                          <div class="flex items-center gap-2.5">
+                            <span class="text-base" aria-hidden="true">🎧</span>
+                            <span class="text-sm font-semibold text-[#F1F5F9]">
+                              {{ podcast.title }}
+                            </span>
+                          </div>
+
+                          <div
+                            role="group"
+                            [attr.aria-label]="'Status para ' + podcast.title"
+                            class="flex flex-wrap items-center gap-2"
+                          >
+                            <button
+                              type="button"
+                              (click)="onStatusClick(podcast.id, 'deep_study')"
+                              [attr.aria-pressed]="podcast.status === 'deep_study'"
+                              [attr.aria-label]="'Marcar como Estudado a Fundo: ' + podcast.title"
+                              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                              [ngClass]="
+                                podcast.status === 'deep_study'
+                                  ? 'bg-[#85E8A5] text-[#064E3B] scale-105 shadow-sm'
+                                  : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                              "
+                            >
+                              🟢 Estudado a Fundo
+                            </button>
+
+                            <button
+                              type="button"
+                              (click)="onStatusClick(podcast.id, 'accelerated')"
+                              [attr.aria-pressed]="podcast.status === 'accelerated'"
+                              [attr.aria-label]="'Marcar como Acelerado para Prova: ' + podcast.title"
+                              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                              [ngClass]="
+                                podcast.status === 'accelerated'
+                                  ? 'bg-[#FFFA93] text-[#713F12] scale-105 shadow-sm'
+                                  : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                              "
+                            >
+                              🟡 Acelerado / Prova
+                            </button>
+
+                            <button
+                              type="button"
+                              (click)="onStatusClick(podcast.id, 'review_later')"
+                              [attr.aria-pressed]="podcast.status === 'review_later'"
+                              [attr.aria-label]="'Marcar como Voltar com Calma: ' + podcast.title"
+                              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                              [ngClass]="
+                                podcast.status === 'review_later'
+                                  ? 'bg-[#D085E8] text-[#581C87] scale-105 shadow-sm'
+                                  : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                              "
+                            >
+                              🟣 Voltar com Calma
+                            </button>
+                          </div>
+                        </div>
+                      }
+
+                      @if (subject.evaluation; as evaluation) {
+                        <div
+                          data-testid="topic-row"
+                          [attr.data-item-id]="evaluation.id"
+                          class="bg-[#1E293B] p-3 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                        >
+                          <div class="flex items-center gap-2.5">
+                            <span class="text-base" aria-hidden="true">📝</span>
+                            <span class="text-sm font-semibold text-[#F1F5F9]">
+                              {{ evaluation.title }}
+                            </span>
+                          </div>
+
+                          <div
+                            role="group"
+                            [attr.aria-label]="'Status para ' + evaluation.title"
+                            class="flex flex-wrap items-center gap-2"
+                          >
+                            <button
+                              type="button"
+                              (click)="onStatusClick(evaluation.id, 'deep_study')"
+                              [attr.aria-pressed]="evaluation.status === 'deep_study'"
+                              [attr.aria-label]="'Marcar como Estudado a Fundo: ' + evaluation.title"
+                              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                              [ngClass]="
+                                evaluation.status === 'deep_study'
+                                  ? 'bg-[#85E8A5] text-[#064E3B] scale-105 shadow-sm'
+                                  : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                              "
+                            >
+                              🟢 Estudado a Fundo
+                            </button>
+
+                            <button
+                              type="button"
+                              (click)="onStatusClick(evaluation.id, 'accelerated')"
+                              [attr.aria-pressed]="evaluation.status === 'accelerated'"
+                              [attr.aria-label]="'Marcar como Acelerado para Prova: ' + evaluation.title"
+                              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                              [ngClass]="
+                                evaluation.status === 'accelerated'
+                                  ? 'bg-[#FFFA93] text-[#713F12] scale-105 shadow-sm'
+                                  : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                              "
+                            >
+                              🟡 Acelerado / Prova
+                            </button>
+
+                            <button
+                              type="button"
+                              (click)="onStatusClick(evaluation.id, 'review_later')"
+                              [attr.aria-pressed]="evaluation.status === 'review_later'"
+                              [attr.aria-label]="'Marcar como Voltar com Calma: ' + evaluation.title"
+                              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                              [ngClass]="
+                                evaluation.status === 'review_later'
+                                  ? 'bg-[#D085E8] text-[#581C87] scale-105 shadow-sm'
+                                  : 'bg-[#374151] text-[#9CA3AF] hover:bg-[#4B5563] hover:text-[#F1F5F9]'
+                              "
+                            >
+                              🟣 Voltar com Calma
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
             </div>
           }
-        </div>
-      </div>
-    }
-  </section>
-</main>
+        }
+      </section>
+    </main>
+  </div>
+</div>
