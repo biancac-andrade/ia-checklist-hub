@@ -1,4 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   isStudyStatus,
   StudyStatus,
@@ -19,6 +21,25 @@ export interface ProgressRepository {
   ): Promise<TopicProgressRecord>;
 }
 
+let envLoaded = false;
+function ensureEnvLoaded(): void {
+  if (envLoaded) {
+    return;
+  }
+  envLoaded = true;
+
+  if (typeof process.loadEnvFile === 'function') {
+    const envPath = resolve(process.cwd(), '.env');
+    if (existsSync(envPath)) {
+      try {
+        process.loadEnvFile(envPath);
+      } catch {
+        // Ignore if already loaded by host environment
+      }
+    }
+  }
+}
+
 let cachedSupabaseClient: SupabaseClient | null = null;
 
 export function getSupabaseClient(): SupabaseClient {
@@ -26,18 +47,22 @@ export function getSupabaseClient(): SupabaseClient {
     return cachedSupabaseClient;
   }
 
+  ensureEnvLoaded();
+
   const supabaseUrl = process.env['SUPABASE_URL'];
-  const supabaseKey =
+  const supabaseSecretKey =
+    process.env['SUPABASE_SECRET_KEY'] ??
     process.env['SUPABASE_SERVICE_ROLE_KEY'] ??
     process.env['SUPABASE_ANON_KEY'];
 
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error(
-      'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY / SUPABASE_ANON_KEY environment variables.'
-    );
+  if (!supabaseUrl || !supabaseSecretKey) {
+    const errorMessage =
+      '[Supabase] Variáveis de ambiente ausentes: defina SUPABASE_URL e SUPABASE_SECRET_KEY no arquivo .env ou no painel do provedor de hospedagem.';
+    console.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
-  cachedSupabaseClient = createClient(supabaseUrl, supabaseKey, {
+  cachedSupabaseClient = createClient(supabaseUrl, supabaseSecretKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -87,7 +112,7 @@ export const supabaseProgressRepository: ProgressRepository = {
       .single();
 
     if (error || !data) {
-      throw new Error(error?.message ?? 'Failed to upsert topic progress.');
+      throw new Error(error?.message ?? 'Falha ao realizar upsert em topic_progress.');
     }
 
     const row = data as TopicProgressRow;
