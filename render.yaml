@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ia-checklist-hub
+    env: node
+    plan: free
+    region: ohio
+    buildCommand: npm install && npx nx build frontend --configuration=production
+    startCommand: node dist/apps/frontend/server/server.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: GEMINI_API_KEY
+        sync: false
