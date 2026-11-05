@@ -4,11 +4,15 @@ services:
     env: node
     plan: free
     region: ohio
-    buildCommand: npm install && npx nx build frontend --configuration=production
+    buildCommand: npm install --include=dev && npx nx build frontend --configuration=production
     startCommand: node dist/apps/frontend/server/server.mjs
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+      - key: CYPRESS_INSTALL_BINARY
+        value: "0"
       - key: PORT
         value: 10000
       - key: GEMINI_API_KEY
