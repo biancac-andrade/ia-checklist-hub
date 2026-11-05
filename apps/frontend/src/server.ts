@@ -4,79 +4,96 @@ import {
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  ReviewPlanInput,
+  ReviewPlanOutput,
+} from '@ia-study-hub/shared-types';
+import { generateReviewPlanFlow, ReviewPlanInputSchema } from './flows';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
 
-const app = express();
-const angularApp = new AngularNodeAppEngine();
+const server = express();
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/**', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
+let angularAppInstance: AngularNodeAppEngine | undefined;
+function getAngularApp(): AngularNodeAppEngine {
+  return (angularAppInstance ??= new AngularNodeAppEngine());
+}
 
-/**
- * Serve static files from /browser
- */
-app.use(
+server.use(express.json());
+
+export async function handleGeneratePlan(
+  req: Request,
+  res: Response,
+  flowRunner: (input: ReviewPlanInput) => Promise<ReviewPlanOutput> = generateReviewPlanFlow
+): Promise<void> {
+  const parseResult = ReviewPlanInputSchema.safeParse(req.body);
+
+  if (!parseResult.success || parseResult.data.acceleratedTopics.length === 0) {
+    res.status(400).json({
+      error:
+        'O campo "acceleratedTopics" é obrigatório e deve ser um array não vazio contendo os tópicos concluídos em ritmo acelerado.',
+    });
+    return;
+  }
+
+  try {
+    const plan = await flowRunner(parseResult.data);
+    res.status(200).json(plan);
+  } catch (error) {
+    console.error('Erro ao gerar plano de revisão com Genkit:', error);
+    res.status(500).json({
+      error: 'Erro interno ao processar a geração do plano de revisão.',
+      details: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+server.post('/api/generate-plan', (req: Request, res: Response): void => {
+  void handleGeneratePlan(req, res);
+});
+
+server.use(
   express.static(browserDistFolder, {
     maxAge: '1y',
     index: false,
     redirect: false,
-  }),
+  })
 );
 
-/**
- * Handle all other requests by rendering the Angular application.
- */
-app.use('/**', (req, res, next) => {
-  angularApp
+server.use('/**', (req: Request, res: Response, next) => {
+  getAngularApp()
     .handle(req)
     .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
+      response ? writeResponseToNodeResponse(response, res) : next()
     )
     .catch(next);
 });
 
-/**
- * Start the server if this module is the main entry point, or it is ran via PM2.
- * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
- */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
   const port = process.env['PORT'] || 4000;
-  const server = app.listen(port, async (error?: Error) => {
+  const runningServer = server.listen(port, (error?: Error) => {
     if (error) {
       throw error;
     }
 
     console.log(`Node Express server listening on http://localhost:${port}`);
-    // Set when Nx waits for this server to be ready
     if (process.env['NX_READY_SIGNAL_SOCKET']) {
       try {
-        // Function keeps TypeScript and bundlers from rewriting or bundling the import
         const load = new Function('s', 'return import(s)') as (
-          s: string,
+          s: string
         ) => Promise<{ emitReadySignal(server: unknown): boolean }>;
-        (await load('@nx/js/ready-signal')).emitReadySignal(server);
+        void load('@nx/js/ready-signal').then((module) => {
+          module.emitReadySignal(runningServer);
+        });
       } catch {
-        // @nx/js isn't installed
+        // Module not found or optional
       }
     }
   });
 }
 
-/**
- * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
- */
-export const reqHandler = createNodeRequestHandler(app);
+export const reqHandler = createNodeRequestHandler(server);
